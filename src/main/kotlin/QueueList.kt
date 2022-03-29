@@ -1,3 +1,9 @@
+import element.Parent
+import element.Track
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import java.io.File
+
 class QueueList {
     var tracks: MutableList<Track>? = mutableListOf()
 
@@ -65,6 +71,24 @@ class QueueList {
         } catch (e: Throwable) {
             System.err.println(e.message)
             throw Exception("Error While Removing Track" + e.message)
+        }
+    }
+
+    fun fillQueueFromJSON(filePath: String) {
+        try {
+            val file = File(filePath)
+            if (!file.exists())
+                throw Exception("File Not Found!")
+
+            val content: String = file.inputStream().readBytes().toString(Charsets.UTF_8)
+            if (content.isEmpty())
+                throw Exception("Reading Failed!")
+
+            val hierarchy = Json.decodeFromString<Parent>(content)
+            add(*hierarchy.data!!.album!!.tracks.toTypedArray())
+        } catch (e: Throwable) {
+            println(e.message)
+            throw Exception("Error Reading File: " + e.message)
         }
     }
 

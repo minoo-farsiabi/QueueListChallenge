@@ -1,4 +1,9 @@
+import element.Media
+import element.Track
 import org.junit.jupiter.api.Test
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -187,6 +192,43 @@ internal class QueueListTest {
             block = {
                 queueList.tracks = mutableListOf(Track("916412", "Eminem", "White America", 324, Media("916412")))
                 queueList.removeAt(Track("916409", "Eminem", "Curtains Up (Skit)", 29, Media("916409")))
+            }
+        )
+    }
+
+    @Test
+    fun fillQueueFromJSON_TrueWhenSuccessfulReadFromFile() {
+        queueList.fillQueueFromJSON("data/tracks.json")
+
+        assertEquals(queueList.tracks!!.size, 20)
+    }
+
+    @Test
+    fun fillQueueFromJSON_FailsWhenFileNotExists() {
+        assertFailsWith(
+            exceptionClass = Exception::class,
+            message = "File Not Found!",
+            block = {
+                queueList.fillQueueFromJSON("data/trackssss.json")
+            }
+        )
+    }
+
+    @Test
+    fun fillQueueFromJSON_FailsWhenEmptyFile() {
+        assertFailsWith(
+            exceptionClass = Exception::class,
+            message = "Reading Failed!",
+            block = {
+                val pathDir: Path?
+                var path: Path? = null
+                try {
+                    pathDir = Files.createTempDirectory(Paths.get("../"), "tempDir")
+                    path = Files.createTempFile(pathDir!!, "temp", ".json")
+                    queueList.fillQueueFromJSON(path.toString())
+                } finally {
+                    path!!.toFile().deleteOnExit()
+                }
             }
         )
     }
